@@ -1,0 +1,7 @@
+Services
+	-catalog API=> 5011
+	-photo stock API=> 5012
+	-basket API => 5013
+	-discount API => 5014
+	-order API => 5015
+identity Server => 5001
