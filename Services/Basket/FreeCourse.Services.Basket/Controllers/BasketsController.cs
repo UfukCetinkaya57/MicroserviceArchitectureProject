@@ -23,7 +23,7 @@ namespace FreeCourse.Services.Basket.Controllers
         [HttpGet]
         public async Task<IActionResult> GetBasket()
         {
-            return CreateActionResultinstance(await _basketService.GetBasket(_sharedIdentityService.GetUserId));
+            return CreateActionResultInstance(await _basketService.GetBasket(_sharedIdentityService.GetUserId));
         }
 
         [HttpPost]
@@ -31,13 +31,13 @@ namespace FreeCourse.Services.Basket.Controllers
         {
             var response = await _basketService.SaveOrUpdate(basketDto);
 
-            return CreateActionResultinstance(response);
+            return CreateActionResultInstance(response);
         }
 
         [HttpDelete]
         public async Task<IActionResult> DeleteBasket()
         {
-            return CreateActionResultinstance(await _basketService.Delete(_sharedIdentityService.GetUserId));
+            return CreateActionResultInstance(await _basketService.Delete(_sharedIdentityService.GetUserId));
         }
     }
 }

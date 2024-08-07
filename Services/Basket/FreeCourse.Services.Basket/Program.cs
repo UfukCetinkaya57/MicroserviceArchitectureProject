@@ -16,7 +16,8 @@ builder.Services.AddControllers(
     opt=>
     {
         opt.Filters.Add(new AuthorizeFilter(requrieAuthorizePolicy));
-    });
+    }
+    );
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

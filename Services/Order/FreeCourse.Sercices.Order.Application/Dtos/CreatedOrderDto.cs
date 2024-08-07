@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FreeCourse.Sercices.Order.Application.Dtos
+namespace FreeCourse.Services.Order.Application.Dtos
 {
     public class CreatedOrderDto
     {

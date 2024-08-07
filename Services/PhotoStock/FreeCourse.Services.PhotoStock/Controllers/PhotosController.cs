@@ -23,10 +23,10 @@ namespace FreeCourse.Services.PhotoStock.Controllers
                 var returnPath= "photos/"+ photo.FileName;
 
                 PhotoDto photoDto = new PhotoDto() { Url=returnPath};
-                return CreateActionResultinstance(Response<PhotoDto>.Success(photoDto, 200));
+                return CreateActionResultInstance(Response<PhotoDto>.Success(photoDto, 200));
 
             }
-            return CreateActionResultinstance(Response<PhotoDto>.Fail("Photo is empty", 400));
+            return CreateActionResultInstance(Response<PhotoDto>.Fail("Photo is empty", 400));
         }
 
         public IActionResult PhotoDelete(string photoUrl)
@@ -36,12 +36,12 @@ namespace FreeCourse.Services.PhotoStock.Controllers
             if (!System.IO.File.Exists(path))
             {
 
-                return CreateActionResultinstance(Response<NoContent>.Fail("Photo not found", 404));
+                return CreateActionResultInstance(Response<NoContent>.Fail("Photo not found", 404));
 
             }
 
             System.IO.File.Delete(path);
-            return CreateActionResultinstance(Response<NoContent>.Success(204));
+            return CreateActionResultInstance(Response<NoContent>.Success(204));
         }
     }
 }

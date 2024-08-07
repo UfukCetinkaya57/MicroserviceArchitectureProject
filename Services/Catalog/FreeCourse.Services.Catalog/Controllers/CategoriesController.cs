@@ -22,21 +22,21 @@ namespace FreeCourse.Services.Catalog.Controllers
         public async Task<IActionResult> GetAll()
         {
             var categories = await _categoryService.GetAllAsync();
-            return CreateActionResultinstance(categories);
+            return CreateActionResultInstance(categories);
         }
 
         [HttpGet("id")]
         public async Task<IActionResult> GetById(string id)
         {
             var category = await _categoryService.GetByIdAsync(id);
-            return CreateActionResultinstance(category);
+            return CreateActionResultInstance(category);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(CategoryDto categoryDto)
         {
             var response = await _categoryService.CreateAsync(categoryDto);
-            return CreateActionResultinstance(response);
+            return CreateActionResultInstance(response);
         }
 
     }

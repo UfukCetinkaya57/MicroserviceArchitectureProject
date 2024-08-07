@@ -10,7 +10,7 @@ namespace FreeCourse.Shared.ControllerBases
 {
     public class CustomBaseController :ControllerBase
     {
-        public ActionResult CreateActionResultinstance<T>(Response<T> response)
+        public ActionResult CreateActionResultInstance<T>(Response<T> response)
         {
             return new ObjectResult(response)
             {
