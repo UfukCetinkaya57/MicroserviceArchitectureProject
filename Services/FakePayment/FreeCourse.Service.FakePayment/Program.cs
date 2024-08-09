@@ -1,3 +1,5 @@
+using FreeCourse.Services.Catalog.Dtos;
+using FreeCourse.Services.Catalog.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -14,7 +16,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     options.Audience = "resource_payment";
     options.RequireHttpsMetadata = false;
 });
-builder.Services.AddControllers(
+
+
+    builder.Services.AddControllers(
     opt =>
     {
         opt.Filters.Add(new AuthorizeFilter(requrieAuthorizePolicy));
@@ -25,6 +29,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

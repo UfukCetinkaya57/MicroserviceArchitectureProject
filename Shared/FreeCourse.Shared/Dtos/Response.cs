@@ -12,7 +12,7 @@ namespace FreeCourse.Shared.Dtos
         public T Data { get;private set; }
         [JsonIgnore]
         public int StatusCode { get; private set; }
-        public bool IsSuccessfull { get; private set; }
+        public bool IsSuccessful { get; private set; }
 
         public List<string> Errors { get; set; }
 
@@ -21,13 +21,13 @@ namespace FreeCourse.Shared.Dtos
         //Static Factory Method
         public static Response<T>Success(T data, int statusCode)
         {
-            return new Response<T> { StatusCode = statusCode, Data = data, IsSuccessfull=true };
+            return new Response<T> { StatusCode = statusCode, Data = data, IsSuccessful=true };
 
         }
 
         public static Response<T> Success(int statusCode)
         {
-            return new Response<T> { StatusCode = statusCode, Data= default(T), IsSuccessfull = true };
+            return new Response<T> { StatusCode = statusCode, Data= default(T), IsSuccessful = true };
 
         }
 
@@ -36,7 +36,7 @@ namespace FreeCourse.Shared.Dtos
             return new Response<T> { 
                 StatusCode = statusCode, 
                 Errors = errors, 
-                IsSuccessfull = false 
+                IsSuccessful = false 
             };
 
         }
@@ -45,7 +45,7 @@ namespace FreeCourse.Shared.Dtos
             {
                 StatusCode = statusCode,
                 Errors = new List<string> { error},
-                IsSuccessfull = false
+                IsSuccessful = false
             };
         }
 
