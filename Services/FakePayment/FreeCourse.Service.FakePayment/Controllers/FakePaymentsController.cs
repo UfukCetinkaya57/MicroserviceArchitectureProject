@@ -1,4 +1,5 @@
 ﻿//using FreeCourse.Services.FakePayment.Models;
+using FreeCourse.Service.FakePayment.Models;
 using FreeCourse.Shared.ControllerBases;
 using FreeCourse.Shared.Dtos;
 //using FreeCourse.Shared.Messages;
@@ -24,9 +25,9 @@ namespace FreeCourse.Services.FakePayment.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ReceivePayment(/*PaymentDto paymentDto*/)
+        public async Task<IActionResult> ReceivePayment(PaymentDto paymentDto)
         {
-            ////paymentDto ile ödeme işlemi gerçekleştir.
+            //paymentDto ile ödeme işlemi gerçekleştir.
             //var sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri("queue:create-order-service"));
 
             //var createOrderMessageCommand = new CreateOrderMessageCommand();
