@@ -36,6 +36,8 @@ namespace FreeCourse.Web.Handler
 
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
+                var responseContent = await response.Content.ReadAsStringAsync();
+
                 var tokenResponse = await _identityService.GetAccessTokenByRefreshToken();
 
                 if (tokenResponse != null)
