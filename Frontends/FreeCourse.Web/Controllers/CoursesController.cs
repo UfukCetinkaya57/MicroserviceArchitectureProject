@@ -1,71 +1,76 @@
-﻿using FreeCourse.Shared.Services;
-using FreeCourse.Web.Models.Catalogs;
-using FreeCourse.Web.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using FreeCourse.Shared.Services; // Ortak servisleri içe aktarma
+using FreeCourse.Web.Models.Catalogs; // Katalog model sınıflarını içe aktarma
+using FreeCourse.Web.Services.Interfaces; // Servis arayüzlerini içe aktarma
+using Microsoft.AspNetCore.Authorization; // Yetkilendirme için gerekli sınıflar
+using Microsoft.AspNetCore.Mvc; // MVC yapısı için gerekli sınıflar
+using Microsoft.AspNetCore.Mvc.Rendering; // Seçim listeleri için gerekli sınıflar
+using System; // Temel sistem sınıfları
+using System.Collections.Generic; // Koleksiyon sınıfları
+using System.Linq; // LINQ işlevleri
+using System.Threading.Tasks; // Asenkron programlama için
 
 namespace FreeCourse.Web.Controllers
 {
-    [Authorize]
+    [Authorize] // Bu denetleyiciye sadece yetkilendirilmiş kullanıcıların erişmesine izin ver
     public class CoursesController : Controller
     {
-        private readonly ICatalogService _catalogService;
-        private readonly ISharedIdentityService _sharedIdentityService;
+        private readonly ICatalogService _catalogService; // Katalog servisi
+        private readonly ISharedIdentityService _sharedIdentityService; // Ortak kimlik servisi
 
         public CoursesController(ICatalogService catalogService, ISharedIdentityService sharedIdentityService)
         {
-            _catalogService = catalogService;
-            _sharedIdentityService = sharedIdentityService;
+            _catalogService = catalogService; // Bağımlılığı atama
+            _sharedIdentityService = sharedIdentityService; // Bağımlılığı atama
         }
 
+        // Kullanıcının kurslarını gösterir
         public async Task<IActionResult> Index()
         {
-            return View(await _catalogService.GetAllCourseByUserIdAsync(_sharedIdentityService.GetUserId));
+            var userId = _sharedIdentityService.GetUserId; // Kullanıcı kimliğini al
+            var courses = await _catalogService.GetAllCourseByUserIdAsync(userId); // Kullanıcıya ait tüm kursları al
+            return View(courses); // Kurs listesini görüntüle
         }
 
+        // Yeni kurs oluşturma sayfasını gösterir
         public async Task<IActionResult> Create()
         {
-            var categories = await _catalogService.GetAllCategoryAsync();
+            var categories = await _catalogService.GetAllCategoryAsync(); // Tüm kategorileri al
+            ViewBag.categoryList = new SelectList(categories, "Id", "Name"); // Kategorileri seçim listesi olarak ayarla
 
-            ViewBag.categoryList = new SelectList(categories, "Id", "Name");
-
-            return View();
+            return View(); // Kurs oluşturma görünümünü döndür
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(CourseCreateInput courseCreateInput)
         {
-            var categories = await _catalogService.GetAllCategoryAsync();
-            ViewBag.categoryList = new SelectList(categories, "Id", "Name");
-            courseCreateInput.UserId = _sharedIdentityService.GetUserId;
+            var categories = await _catalogService.GetAllCategoryAsync(); // Tüm kategorileri al
+            ViewBag.categoryList = new SelectList(categories, "Id", "Name"); // Kategorileri seçim listesi olarak ayarla
+            courseCreateInput.UserId = _sharedIdentityService.GetUserId; // Kullanıcı kimliğini ekle
 
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid) // Model doğrulaması
             {
-                return View();
+                return View(); // Hatalı ise görünümü döndür
             }
 
-            await _catalogService.CreateCourseAsync(courseCreateInput);
+            await _catalogService.CreateCourseAsync(courseCreateInput); // Kursu oluştur
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index)); // Kurslar sayfasına yönlendir
         }
 
+        // Kurs güncelleme sayfasını gösterir
         public async Task<IActionResult> Update(string id)
         {
-            var course = await _catalogService.GetByCourseId(id);
-            var categories = await _catalogService.GetAllCategoryAsync();
+            var course = await _catalogService.GetByCourseId(id); // Kursu al
+            var categories = await _catalogService.GetAllCategoryAsync(); // Tüm kategorileri al
 
-            if (course == null)
+            if (course == null) // Eğer kurs bulunamazsa
             {
-                //mesaj göster
-                RedirectToAction(nameof(Index));
+                // Mesaj göster (bu kısım eksik, bir mesaj mekanizması eklenebilir)
+                return RedirectToAction(nameof(Index)); // Kurslar sayfasına yönlendir
             }
-            ViewBag.categoryList = new SelectList(categories, "Id", "Name", course.Id);
-            CourseUpdateInput courseUpdateInput = new() 
+
+            ViewBag.categoryList = new SelectList(categories, "Id", "Name", course.CategoryId); // Seçim listesi oluştur
+            var courseUpdateInput = new CourseUpdateInput // Güncelleme için gerekli bilgileri ayarla
             {
                 Id = course.Id,
                 Name = course.Name,
@@ -77,28 +82,29 @@ namespace FreeCourse.Web.Controllers
                 Picture = course.Picture
             };
 
-            return View(courseUpdateInput);
+            return View(courseUpdateInput); // Güncelleme görünümünü döndür
         }
 
         [HttpPost]
         public async Task<IActionResult> Update(CourseUpdateInput courseUpdateInput)
         {
-            var categories = await _catalogService.GetAllCategoryAsync();
-            ViewBag.categoryList = new SelectList(categories, "Id", "Name", courseUpdateInput.Id);
-            if (!ModelState.IsValid)
+            var categories = await _catalogService.GetAllCategoryAsync(); // Tüm kategorileri al
+            ViewBag.categoryList = new SelectList(categories, "Id", "Name", courseUpdateInput.CategoryId); // Seçim listesi oluştur
+            if (!ModelState.IsValid) // Model doğrulaması
             {
-                return View();
+                return View(); // Hatalı ise görünümü döndür
             }
-            await _catalogService.UpdateCourseAsync(courseUpdateInput);
+            await _catalogService.UpdateCourseAsync(courseUpdateInput); // Kursu güncelle
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index)); // Kurslar sayfasına yönlendir
         }
 
+        // Kursu siler
         public async Task<IActionResult> Delete(string id)
         {
-            await _catalogService.DeleteCourseAsync(id);
+            await _catalogService.DeleteCourseAsync(id); // Kursu sil
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index)); // Kurslar sayfasına yönlendir
         }
     }
 }

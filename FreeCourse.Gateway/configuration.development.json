@@ -1,29 +1,31 @@
 {
   "Routes": [
     {
+      // Katalog servisine yönlendirme
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5011
+          "Port": 5011 // Katalog servisi için port
         }
       ],
       "UpstreamPathTemplate": "/services/catalog/{everything}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ], // Desteklenen HTTP metodları
       "UpstreamScheme": "http",
       "AuthenticationOptions": {
-        "AuthenticationProviderKey": "GatewayAuthenticationScheme",
-        "AllowedScopes": [ "catalog_fullpermission" ]
+        "AuthenticationProviderKey": "GatewayAuthenticationScheme", // Kimlik doğrulama şeması
+        "AllowedScopes": [ "catalog_fullpermission" ] // İzin verilen kapsam
       }
     },
     {
+      // Fotoğraf stok servisine yönlendirme
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5012
+          "Port": 5012 // Fotoğraf stok servisi için port
         }
       ],
       "UpstreamPathTemplate": "/services/photostock/{everything}",
@@ -35,12 +37,13 @@
       }
     },
     {
+      // Sepet servisine yönlendirme
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5013
+          "Port": 5013 // Sepet servisi için port
         }
       ],
       "UpstreamPathTemplate": "/services/basket/{everything}",
@@ -52,29 +55,31 @@
       }
     },
     {
+      // İndirim servisine yönlendirme
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5014
+          "Port": 5014 // İndirim servisi için port
         }
       ],
       "UpstreamPathTemplate": "/services/discount/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "UpstreamScheme": "http",
-      "DelegatingHandlers": [ "TokenExhangeDelegateHandler" ],
+      "DelegatingHandlers": [ "TokenExhangeDelegateHandler" ], // Token exchange işlemi için delegating handler
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "GatewayAuthenticationScheme"
       }
     },
     {
+      // Sipariş servisine yönlendirme
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5015
+          "Port": 5015 // Sipariş servisi için port
         }
       ],
       "UpstreamPathTemplate": "/services/order/{everything}",
@@ -86,24 +91,26 @@
       }
     },
     {
+      // Fake payment servisine yönlendirme
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5016
+          "Port": 5016 // Fake payment servisi için port
         }
       ],
       "UpstreamPathTemplate": "/services/fakepayment/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "UpstreamScheme": "http",
-      "DelegatingHandlers": [ "TokenExhangeDelegateHandler" ],
+      "DelegatingHandlers": [ "TokenExhangeDelegateHandler" ], // Token exchange işlemi için delegating handler
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "GatewayAuthenticationScheme"
       }
     }
   ],
+  // Global yapılandırma ayarları
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:5000"
+    "BaseUrl": "http://localhost:5000" // API Gateway'in temel URL'si
   }
 }

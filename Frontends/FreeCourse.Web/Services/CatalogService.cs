@@ -1,135 +1,144 @@
-﻿using FreeCourse.Shared.Dtos;
-using FreeCourse.Web.Helpers;
-//using FreeCourse.Web.Helpers;
-using FreeCourse.Web.Models;
-using FreeCourse.Web.Models.Catalogs;
-using FreeCourse.Web.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
+﻿using FreeCourse.Shared.Dtos; // Paylaşılan DTO sınıfları
+using FreeCourse.Web.Helpers; // Yardımcı sınıflar
+using FreeCourse.Web.Models; // Model sınıfları
+using FreeCourse.Web.Models.Catalogs; // Katalog model sınıfları
+using FreeCourse.Web.Services.Interfaces; // Servis arayüzleri
+using System; // Temel sistem sınıfları
+using System.Collections.Generic; // Koleksiyon sınıfları
+using System.Linq; // LINQ işlevleri
+using System.Net.Http; // HTTP istemcisi
+using System.Net.Http.Json; // JSON ile HTTP istekleri
+using System.Threading.Tasks; // Asenkron programlama için
 
 namespace FreeCourse.Web.Services
 {
+    // Katalog servis sınıfı
     public class CatalogService : ICatalogService
     {
-        private readonly HttpClient _client;
-        private readonly IPhotoStockService _photoStockService;
-        private readonly PhotoHelper _photoHelper;
+        private readonly HttpClient _client; // HTTP istemcisi
+        private readonly IPhotoStockService _photoStockService; // Fotoğraf servisi
+        private readonly PhotoHelper _photoHelper; // Fotoğraf yardımcı sınıfı
 
+        // Yapıcı metot
         public CatalogService(HttpClient client, IPhotoStockService photoStockService, PhotoHelper photoHelper)
         {
-            _client = client;
-            _photoStockService = photoStockService;
-            _photoHelper = photoHelper;
+            _client = client; // HTTP istemcisi
+            _photoStockService = photoStockService; // Fotoğraf servisi
+            _photoHelper = photoHelper; // Fotoğraf yardımcı sınıfı
         }
 
+        // Kurs oluşturma metodu
         public async Task<bool> CreateCourseAsync(CourseCreateInput courseCreateInput)
         {
+            // Fotoğraf yükle
             var resultPhotoService = await _photoStockService.UploadPhoto(courseCreateInput.PhotoFormFile);
 
+            // Fotoğrafın URL'sini ayarla
             if (resultPhotoService != null)
             {
                 courseCreateInput.Picture = resultPhotoService.Url;
             }
 
+            // Kursu kaydet
             var response = await _client.PostAsJsonAsync<CourseCreateInput>("courses", courseCreateInput);
-           // var responseContent = await response.Content.ReadAsStringAsync();
-          
-            return response.IsSuccessStatusCode;
+
+            return response.IsSuccessStatusCode; // Başarılı olup olmadığını döndür
         }
 
+        // Kurs silme metodu
         public async Task<bool> DeleteCourseAsync(string courseId)
         {
             var response = await _client.DeleteAsync($"courses/{courseId}");
 
-            return response.IsSuccessStatusCode;
+            return response.IsSuccessStatusCode; // Başarılı olup olmadığını döndür
         }
 
+        // Tüm kategorileri alma metodu
         public async Task<List<CategoryViewModel>> GetAllCategoryAsync()
         {
             var response = await _client.GetAsync("categories");
 
             if (!response.IsSuccessStatusCode)
             {
-                return null;
+                return null; // Başarısızsa null döndür
             }
 
             var responseSuccess = await response.Content.ReadFromJsonAsync<Response<List<CategoryViewModel>>>();
 
-            return responseSuccess.Data;
+            return responseSuccess.Data; // Kategorileri döndür
         }
 
+        // Tüm kursları alma metodu
         public async Task<List<CourseViewModel>> GetAllCourseAsync()
         {
-            //http:localhost:5000/services/catalog/courses
             var response = await _client.GetAsync("courses");
-            
+
             if (!response.IsSuccessStatusCode)
             {
-                return null;
+                return null; // Başarısızsa null döndür
             }
 
             var responseSuccess = await response.Content.ReadFromJsonAsync<Response<List<CourseViewModel>>>();
             responseSuccess.Data.ForEach(x =>
             {
-                x.StockPictureUrl = _photoHelper.GetPhotoStockUrl(x.Picture);
-            }); 
-            return responseSuccess.Data;
+                x.StockPictureUrl = _photoHelper.GetPhotoStockUrl(x.Picture); // Fotoğraf URL'sini ayarla
+            });
+
+            return responseSuccess.Data; // Kursları döndür
         }
 
+        // Kullanıcıya ait tüm kursları alma metodu
         public async Task<List<CourseViewModel>> GetAllCourseByUserIdAsync(string userId)
         {
-            //[controller]/GetAllByUserId/{userId}
-
             var response = await _client.GetAsync($"courses/GetAllByUserId/{userId}");
 
             if (!response.IsSuccessStatusCode)
             {
-                return null;
+                return null; // Başarısızsa null döndür
             }
 
             var responseSuccess = await response.Content.ReadFromJsonAsync<Response<List<CourseViewModel>>>();
-
             responseSuccess.Data.ForEach(x =>
             {
-                x.StockPictureUrl = _photoHelper.GetPhotoStockUrl(x.Picture);
+                x.StockPictureUrl = _photoHelper.GetPhotoStockUrl(x.Picture); // Fotoğraf URL'sini ayarla
             });
 
-            return responseSuccess.Data;
+            return responseSuccess.Data; // Kursları döndür
         }
 
+        // Belirli bir kursu alma metodu
         public async Task<CourseViewModel> GetByCourseId(string courseId)
         {
             var response = await _client.GetAsync($"courses/{courseId}");
 
             if (!response.IsSuccessStatusCode)
             {
-                return null;
+                return null; // Başarısızsa null döndür
             }
 
             var responseSuccess = await response.Content.ReadFromJsonAsync<Response<CourseViewModel>>();
+            responseSuccess.Data.StockPictureUrl = _photoHelper.GetPhotoStockUrl(responseSuccess.Data.Picture); // Fotoğraf URL'sini ayarla
 
-            responseSuccess.Data.StockPictureUrl = _photoHelper.GetPhotoStockUrl(responseSuccess.Data.Picture);
-
-            return responseSuccess.Data;
+            return responseSuccess.Data; // Kursu döndür
         }
 
+        // Kurs güncelleme metodu
         public async Task<bool> UpdateCourseAsync(CourseUpdateInput courseUpdateInput)
         {
+            // Fotoğraf yükle
             var resultPhotoService = await _photoStockService.UploadPhoto(courseUpdateInput.PhotoFormFile);
 
+            // Eski fotoğrafı sil ve yeni fotoğrafı ayarla
             if (resultPhotoService != null)
             {
                 await _photoStockService.DeletePhoto(courseUpdateInput.Picture);
                 courseUpdateInput.Picture = resultPhotoService.Url;
             }
 
+            // Kursu güncelle
             var response = await _client.PutAsJsonAsync<CourseUpdateInput>("courses", courseUpdateInput);
 
-            return response.IsSuccessStatusCode;
+            return response.IsSuccessStatusCode; // Başarılı olup olmadığını döndür
         }
     }
 }

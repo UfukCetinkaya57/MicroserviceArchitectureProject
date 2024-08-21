@@ -14,20 +14,24 @@ using FreeCourse.Services.Order.Application.Consumers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Servisleri konteyner'e ekleme
 builder.Services.AddMassTransit(x =>
 {
+    // Mesaj tüketicilerini ekle
     x.AddConsumer<CreateOrderMessageCommandConsumer>();
     x.AddConsumer<CourseNameChangedEventConsumer>();
-    // Default Port : 5672
+
+    // RabbitMQ yapýlandýrmasý
     x.UsingRabbitMq((context, cfg) =>
     {
+        // RabbitMQ sunucusuna baðlan
         cfg.Host(builder.Configuration["RabbitMQUrl"], "/", host =>
         {
             host.Username("guest");
             host.Password("guest");
         });
 
+        // Mesaj alma noktalarý
         cfg.ReceiveEndpoint("create-order-service", e =>
         {
             e.ConfigureConsumer<CreateOrderMessageCommandConsumer>(context);
@@ -39,57 +43,70 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
-
+// MassTransit'i arka planda çalýþtýrmak için gerekli hizmeti ekle
 builder.Services.AddMassTransitHostedService();
 
+// Veritabaný baðlamý için SQL Server yapýlandýrmasý
 builder.Services.AddDbContext<OrderDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), configure =>
     {
-        configure.EnableRetryOnFailure();
+        configure.EnableRetryOnFailure(); // Hata durumunda tekrar deneme
         configure.MigrationsAssembly("FreeCourse.Services.Order.Infrastructure");
     });
 });
 
-var requrieAuthorizePolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("sub");
+// Yetkilendirme politikasý oluþtur
+var requireAuthorizePolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+
+// JWT güvenlik ayarlarýný yapýlandýr
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("sub"); // Varsayýlan "sub" iddia tipini kaldýr
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
-    options.Authority = builder.Configuration["IdentityServerURL"];
-    options.Audience = "resource_order";
-    options.RequireHttpsMetadata = false;
+    options.Authority = builder.Configuration["IdentityServerURL"]; // Kimlik sunucusu URL'si
+    options.Audience = "resource_order"; // Beklenen izleyici
+    options.RequireHttpsMetadata = false; // HTTPS zorunlu deðil
 });
 
+// HttpContextAccessor ekle
 builder.Services.AddHttpContextAccessor();
+
+// Kullanýcý kimliði servisini ekle
 builder.Services.AddScoped<ISharedIdentityService, SharedIdentityService>();
+
+// MediatR'ý ekle
 builder.Services.AddMediatR(typeof(CreateOrderCommandHandler).Assembly);
 
+// Denetleyicileri ekle ve yetkilendirme filtresini ekle
 builder.Services.AddControllers(opt =>
 {
-    opt.Filters.Add(new AuthorizeFilter(requrieAuthorizePolicy));
+    opt.Filters.Add(new AuthorizeFilter(requireAuthorizePolicy)); // Tüm denetleyiciler için yetkilendirme
 });
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// Swagger/OpenAPI yapýlandýrmasý
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// HTTP istek boru hattýný yapýlandýr
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwagger(); // Swagger'ý geliþtirme modunda etkinleþtir
+    app.UseSwaggerUI(); // Swagger kullanýcý arayüzünü etkinleþtir
 }
 
+// Veritabaný migrasyonunu uygula
 using (var scope = app.Services.CreateScope())
 {
     var serviceProvider = scope.ServiceProvider;
     var orderDbContext = serviceProvider.GetRequiredService<OrderDbContext>();
-    orderDbContext.Database.Migrate();
+    orderDbContext.Database.Migrate(); // Migrasyonlarý uygula
 }
-app.UseAuthentication();
-app.UseAuthorization();
 
-app.MapControllers();
+app.UseAuthentication(); // Kimlik doðrulamasýný etkinleþtir
+app.UseAuthorization(); // Yetkilendirmeyi etkinleþtir
 
-app.Run();
+app.MapControllers(); // Denetleyicileri haritalandýr
+
+app.Run(); // Uygulamayý çalýþtýr

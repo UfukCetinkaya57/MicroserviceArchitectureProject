@@ -1,20 +1,15 @@
-using MassTransit;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Threading.Tasks;
+using MassTransit; // Mesajlaþma altyapýsý için MassTransit kullanýmý
+using Microsoft.AspNetCore.Authentication.JwtBearer; // JWT tabanlý kimlik doðrulama için
+using Microsoft.AspNetCore.Authorization; // Yetkilendirme iþlemleri için
+using Microsoft.AspNetCore.Builder; // Uygulama yapýlandýrmasý için
+using Microsoft.AspNetCore.Hosting; // Web hosting iþlemleri için
+using Microsoft.AspNetCore.Mvc; // MVC yapýlandýrmasý için
+using Microsoft.AspNetCore.Mvc.Authorization; // MVC'de yetkilendirme filtreleri için
+using Microsoft.Extensions.Configuration; // Uygulama yapýlandýrma ayarlarýna eriþim için
+using Microsoft.Extensions.DependencyInjection; // Dependency Injection (Baðýmlýlýk Enjeksiyonu) yapýlandýrmasý için
+using Microsoft.Extensions.Hosting; // Uygulamanýn çalýþma ortamýna eriþim için
+using Microsoft.OpenApi.Models; // Swagger dokümantasyonu için
+using System.IdentityModel.Tokens.Jwt; // JWT iþleme ve yönetimi için
 
 namespace FreeCourse.Services.FakePayment
 {
@@ -27,59 +22,69 @@ namespace FreeCourse.Services.FakePayment
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        // Uygulama servislerini yapýlandýrmak için kullanýlýr.
         public void ConfigureServices(IServiceCollection services)
         {
+            // MassTransit'i RabbitMQ ile yapýlandýrma
             services.AddMassTransit(x =>
             {
-                // Default Port : 5672
                 x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(Configuration["RabbitMQUrl"], "/", host =>
                     {
-                        host.Username("guest");
-                        host.Password("guest");
+                        host.Username("guest"); // RabbitMQ kullanýcý adý
+                        host.Password("guest"); // RabbitMQ þifresi
                     });
                 });
             });
 
-            services.AddMassTransitHostedService();
+            services.AddMassTransitHostedService(); // MassTransit'i hosted service olarak ekleme
+
+            // Yetkilendirme politikasý: tüm kullanýcýlarýn kimlik doðrulamasý yapmasýný gerektirir
             var requireAuthorizePolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+
+            // JWT tokenlarýndaki sub claim'ini varsayýlan olarak kaldýrýr
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("sub");
+
+            // JWT tabanlý kimlik doðrulamayý yapýlandýrma
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
-                options.Authority = Configuration["IdentityServerURL"];
-                options.Audience = "resource_payment";
-                options.RequireHttpsMetadata = false;
+                options.Authority = Configuration["IdentityServerURL"]; // IdentityServer URL'si
+                options.Audience = "resource_payment"; // API'nýn hedef kitlesi
+                options.RequireHttpsMetadata = false; // HTTPS zorunluluðunu kaldýrýr (geliþtirme ortamý için)
             });
 
+            // MVC'yi yapýlandýrma ve yetkilendirme filtresi ekleme
             services.AddControllers(opt =>
             {
                 opt.Filters.Add(new AuthorizeFilter(requireAuthorizePolicy));
             });
+
+            // Swagger dokümantasyonu yapýlandýrmasý
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "FreeCourse.Services.FakePayment", Version = "v1" });
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        // HTTP istekleri için uygulama pipeline'ýný yapýlandýrmak için kullanýlýr.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // Geliþtirme ortamý için yapýlandýrmalar
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
+                app.UseDeveloperExceptionPage(); // Geliþtirme istisna sayfasý
+                app.UseSwagger(); // Swagger dokümantasyonu
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "FreeCourse.Services.FakePayment v1"));
             }
 
-            app.UseRouting();
-            app.UseAuthentication();
-            app.UseAuthorization();
+            app.UseRouting(); // Yönlendirme middleware'ini kullanma
+            app.UseAuthentication(); // Kimlik doðrulama middleware'ini kullanma
+            app.UseAuthorization(); // Yetkilendirme middleware'ini kullanma
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllers(); // MVC controller'larý için endpoint haritalama
             });
         }
     }
