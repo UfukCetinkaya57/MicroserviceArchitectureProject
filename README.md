@@ -1,4 +1,4 @@
-Bu proje, Udemy'de Fatih Çakıroğlu oluşturulmuş, mikroservis mimarisi kursunda yapılan projeden esinlenerek düzenlenmiş bir online eğitim platformudur. Proje, farklı veritabanları ve teknolojiler kullanarak esnek, ölçeklenebilir ve sürdürülebilir bir yapı sunmayı amaçlamaktadır.
+Bu proje, Udemy'de Fatih Çakıroğlu oluşturulmuş mikroservis mimarisi kursunda yapılan projeden esinlenerek düzenlenmiş bir online eğitim platformudur. Proje, farklı veritabanları ve teknolojiler kullanarak esnek, ölçeklenebilir ve sürdürülebilir bir yapı sunmayı amaçlamaktadır.
 
 ## Kullanılan Teknolojiler
 
