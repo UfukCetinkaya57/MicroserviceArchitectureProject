@@ -1,6 +1,6 @@
 # Online Education Platform
 
-This project is an online education platform, inspired by a project created by Fatih Çakıroğlu in the microservices architecture course on Udemy. The project aims to provide a flexible, scalable, and sustainable structure by using different databases and technologies.
+This project is an online education platform based on microservice architecture. The project aims to provide a flexible, scalable, and sustainable structure by using different databases and technologies.
 
 ## Technologies Used
 
